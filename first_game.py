@@ -1,3 +1,5 @@
+# Moving around the grid is the same as in Java: top left is (0, 0) moving right is +X moving down is +Y
+
 import pygame as pg
 import ctypes
 
@@ -21,11 +23,9 @@ speed = 4
 character_colour = (255, 105, 180)
 character_dimensions = (x, y, width, height)
 
-
+# Game window info.  Screen_fill is colour used to redraw the screen after movement
 window_alive = True
-
 game_window = pg.display.set_mode(window_dimensions)
-
 pg.display.set_caption(window_title)
 
 while window_alive:
@@ -33,6 +33,7 @@ while window_alive:
     # 1/10 of a second
     pg.time.delay(100)
 
+    # character coordinates are stored in the top left of the character
     character_dimensions = (x, y, width, height)
 
     for event in pg.event.get():
