@@ -30,6 +30,9 @@ window_title = 'Learning Pygame'
 pg.display.set_caption(window_title)
 screen_fill = (0, 0, 0)
 
+in_jump = False
+jump_iter = speed
+
 while window_alive:
     # using delay in place of a clock
     # 1/10 of a second
@@ -50,11 +53,22 @@ while window_alive:
     if key_inputs[pg.K_RIGHT] and character_dimensions[0] < window_width - character_dimensions[2] - speed:
         character_dimensions[0] += speed
 
-    if key_inputs[pg.K_UP] and character_dimensions[1] > speed:
-        character_dimensions[1] -= speed
+    if not in_jump:
+        if key_inputs[pg.K_UP] and character_dimensions[1] > speed:
+            character_dimensions[1] -= speed
 
-    if key_inputs[pg.K_DOWN] and character_dimensions[1] < window_height - character_dimensions[3] - speed:
-        character_dimensions[1] += speed
+        if key_inputs[pg.K_DOWN] and character_dimensions[1] < window_height - character_dimensions[3] - speed:
+            character_dimensions[1] += speed
+
+        if key_inputs[pg.K_SPACE]:
+            in_jump = True
+    else:
+        if jump_iter >= speed * -1:
+            character_dimensions[1] -= (jump_iter * abs(jump_iter)) / 2
+            jump_iter -= 1
+        else:
+            jump_iter = speed
+            in_jump = False
 
     game_window.fill(screen_fill)
     pg.draw.rect(game_window, character_colour, character_dimensions)
