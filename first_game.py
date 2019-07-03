@@ -5,14 +5,9 @@ import ctypes
 
 user32 = ctypes.windll.user32
 monitor_resolution = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-screen_fill = (0, 0, 0)
 
 # initializes pygame
 pg.init()
-
-# window/view port info
-window_dimensions = (monitor_resolution[0] // 2, monitor_resolution[1] // 2)
-window_title = 'Learning Pygame'
 
 # character parameters
 x = 50
@@ -23,10 +18,17 @@ speed = 4
 character_colour = (255, 105, 180)
 character_dimensions = (x, y, width, height)
 
-# Game window info.  Screen_fill is colour used to redraw the screen after movement
-window_alive = True
+# window/view port info. Screen_fill is colour used to redraw the screen after movement
+window_width = monitor_resolution[0] // 2
+window_height = monitor_resolution[1] // 2
+window_dimensions = (window_width, window_height)
 game_window = pg.display.set_mode(window_dimensions)
+
+window_alive = True
+
+window_title = 'Learning Pygame'
 pg.display.set_caption(window_title)
+screen_fill = (0, 0, 0)
 
 while window_alive:
     # using delay in place of a clock
