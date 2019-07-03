@@ -16,7 +16,7 @@ width = 20
 height = 20
 speed = 4
 character_colour = (255, 105, 180)
-character_dimensions = (x, y, width, height)
+character_dimensions = [x, y, width, height]
 
 # window/view port info. Screen_fill is colour used to redraw the screen after movement
 window_width = monitor_resolution[0] // 2
@@ -36,7 +36,6 @@ while window_alive:
     pg.time.delay(100)
 
     # character coordinates are stored in the top left of the character
-    character_dimensions = (x, y, width, height)
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -45,16 +44,17 @@ while window_alive:
     key_inputs = pg.key.get_pressed()
 
     # print(key_inputs)
-    if key_inputs[pg.K_LEFT]:
-        x -= speed
-        print("Helo")
-        print(x)
-    if key_inputs[pg.K_RIGHT]:
-        x += speed
-    if key_inputs[pg.K_UP]:
-        y -= speed
-    if key_inputs[pg.K_DOWN]:
-        y += speed
+    if key_inputs[pg.K_LEFT] and character_dimensions[0] > speed:
+        character_dimensions[0] -= speed
+
+    if key_inputs[pg.K_RIGHT] and character_dimensions[0] < window_width - character_dimensions[2] - speed:
+        character_dimensions[0] += speed
+
+    if key_inputs[pg.K_UP] and character_dimensions[1] > speed:
+        character_dimensions[1] -= speed
+
+    if key_inputs[pg.K_DOWN] and character_dimensions[1] < window_height - character_dimensions[3] - speed:
+        character_dimensions[1] += speed
 
     game_window.fill(screen_fill)
     pg.draw.rect(game_window, character_colour, character_dimensions)
