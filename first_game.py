@@ -2,6 +2,7 @@
 
 import pygame as pg
 import ctypes
+from os import listdir
 
 user32 = ctypes.windll.user32
 monitor_resolution = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
@@ -18,6 +19,15 @@ speed = 8
 character_colour = (255, 105, 180)
 character_dimensions = [x, y, width, height]
 
+# Vars for tracking player movement
+is_left = False
+is_right = False
+steps_taken = 0
+
+# load character model images
+walk_right = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if ('R' in the_file and 'E' not in the_file)]
+walk_left = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if ('L' in the_file and 'E' not in the_file)]
+
 # window/view port info. Screen_fill is colour used to redraw the screen after movement
 window_width = monitor_resolution[0] // 2
 window_height = monitor_resolution[1] // 2
@@ -30,6 +40,7 @@ window_title = 'Learning Pygame'
 pg.display.set_caption(window_title)
 screen_fill = (0, 0, 0)
 
+# info used to track jump status
 in_jump = False
 jump_iter = speed
 
@@ -54,12 +65,6 @@ while window_alive:
         character_dimensions[0] += speed
 
     if not in_jump:
-        if key_inputs[pg.K_UP] and character_dimensions[1] > speed:
-            character_dimensions[1] -= speed
-
-        if key_inputs[pg.K_DOWN] and character_dimensions[1] < window_height - character_dimensions[3] - speed:
-            character_dimensions[1] += speed
-
         if key_inputs[pg.K_SPACE]:
             in_jump = True
     else:
@@ -76,4 +81,9 @@ while window_alive:
 
 pg.quit()
 
-
+# Tutorial is going towards a platform game so character moves along the Y axis by jumping only
+# if key_inputs[pg.K_UP] and character_dimensions[1] > speed:
+#     character_dimensions[1] -= speed
+#
+# if key_inputs[pg.K_DOWN] and character_dimensions[1] < window_height - character_dimensions[3] - speed:
+#     character_dimensions[1] += speed
