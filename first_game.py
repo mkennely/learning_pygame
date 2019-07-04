@@ -14,6 +14,16 @@ game_clock = pg.time.Clock()
 
 
 class Player(object):
+    # load character model images
+    # these images are shown when the character is moving left
+    orient_right = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if
+                    ('R' in the_file and 'E' not in the_file)]
+    # character model is moving right
+    orient_left = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if
+                   ('L' in the_file and 'E' not in the_file)]
+    # character model is not moving or is jumping - tutorial says jumping, but I disagree
+    orient_neutral = pg.image.load('assets/standing.png')
+
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -45,16 +55,58 @@ class Player(object):
 
         if not self.standing:
             if self.is_left:
-                window.blit(orient_left[self.steps_taken // 3], (self.x, self.y))
+                window.blit(self.orient_left[self.steps_taken // 3], (self.x, self.y))
                 self.steps_taken += 1
             elif self.is_right:
-                window.blit(orient_right[self.steps_taken // 3], (self.x, self.y))
+                window.blit(self.orient_right[self.steps_taken // 3], (self.x, self.y))
                 self.steps_taken += 1
         else:
             if self.is_right:
-                window.blit(orient_right[0], (self.x, self.y))
+                window.blit(self.orient_right[0], (self.x, self.y))
             else:
-                window.blit(orient_left[0], (self.x, self.y))
+                window.blit(self.orient_left[0], (self.x, self.y))
+
+
+class Enemy(object):
+    orient_right = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if ('R' in the_file and 'E' in the_file)]
+    orient_left = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if ('L' in the_file and 'E' in the_file)]
+
+    def __init__(self, x, y, width, height, end):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.end = end
+        self.path = [self.x, self.end]
+        self.step_count = 0
+        self.velocity = 3
+
+    def draw(self, window):
+        self.move()
+        if self.step_count + 1 <= 33:
+            self.step_count = 0
+
+        if self.velocity > 0:
+            window.blit(self.orient_right[self.step_count // 3], (self.x, self.y))
+            self.step_count += 1
+        elif self.velocity < 0:
+            window.blit(self.orient_left[self.step_count // 3], (self.x, self.y))
+            self.step_count += 1
+
+    def move(self):
+        if self.velocity > 0:
+            if self.x + self.velocity < self.path[1]:
+                self.x += self.velocity
+            else:
+                self.velocity *= -1
+                self.step_count = 0
+        else:
+            if self.x - self.velocity > self.path[0]:
+                self.x += self.velocity
+            else:
+                self.velocity *= -1
+                self.step_count = 0
+        pass
 
 
 class Projectile(object):
@@ -70,13 +122,6 @@ class Projectile(object):
         pg.draw.circle(window, self.colour, (self.x, self.y), self.radius)
 
 
-# load character model images
-# these images are shown when the character is moving left
-orient_right = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if ('R' in the_file and 'E' not in the_file)]
-# character model is moving right
-orient_left = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if ('L' in the_file and 'E' not in the_file)]
-# character model is not moving or is jumping - tutorial says jumping, but I disagree
-orient_neutral = pg.image.load('assets/standing.png')
 # general background
 game_background = pg.image.load('assets/bg.jpg')
 
