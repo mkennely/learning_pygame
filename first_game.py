@@ -12,19 +12,45 @@ pg.init()
 
 game_clock = pg.time.Clock()
 
-# character parameters
-x = 50
-y = 400
-width = 64
-height = 64
-speed = 8
-character_colour = (255, 105, 180)
-character_dimensions = [x, y, width, height]
 
-# Vars for tracking player movement
-is_left = False
-is_right = False
-steps_taken = 0
+class Player(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.velocity = 5
+        self.in_jump = False
+        self.jump_iter = 10
+        self.is_left = False
+        self.is_right = False
+        self.steps_taken = 0
+
+    def set_left(self):
+        self.is_left = True
+        self.is_right = False
+
+    def set_right(self):
+        self.is_left = False
+        self.is_right = True
+
+    def set_neutral(self):
+        self.is_left = False
+        self.is_right = False
+
+    def draw(self, window):
+        if self.steps_taken + 1 >= 27:
+            self.steps_taken = 0
+
+        if self.is_left:
+            window.blit(orient_left[self.steps_taken // 3], (self.x, self.y))
+            self.steps_taken += 1
+        elif self.is_right:
+            window.blit(orient_right[self.steps_taken // 3], (self.x, self.y))
+            self.steps_taken += 1
+        else:
+            window.blit(orient_neutral, (self.x, self.y))
+
 
 # load character model images
 # these images are shown when the character is moving left
@@ -51,29 +77,14 @@ window_title = 'Learning Pygame'
 pg.display.set_caption(window_title)
 screen_fill = (0, 0, 0)
 
-# info used to track jump status
-in_jump = False
-jump_iter = speed
-
 
 def draw_game_window():
-    global steps_taken
     game_window.blit(game_background, (0, 0))
-
-    if steps_taken + 1 >= 27:
-        steps_taken = 0
-
-    if is_left:
-        game_window.blit(orient_left[steps_taken//3], (character_dimensions[0], character_dimensions[1]))
-        steps_taken += 1
-    elif is_right:
-        game_window.blit(orient_right[steps_taken//3], (character_dimensions[0], character_dimensions[1]))
-        steps_taken += 1
-    else:
-        game_window.blit(orient_neutral, (character_dimensions[0], character_dimensions[1]))
+    main_character.draw(game_window)
     pg.display.update()
 
 
+main_character = Player(300, 410, 64, 64)
 # the Main loop - as soon as the loop ends the game ends
 while window_alive:
     # using delay in place of a clock
@@ -89,34 +100,31 @@ while window_alive:
     key_inputs = pg.key.get_pressed()
 
     # print(key_inputs)
-    if key_inputs[pg.K_LEFT] and character_dimensions[0] > speed:
-        character_dimensions[0] -= speed
-        is_left = True
-        is_right = False
+    if key_inputs[pg.K_LEFT] and main_character.x > main_character.velocity:
+        main_character.x -= main_character.velocity
+        main_character.set_left()
 
-    elif key_inputs[pg.K_RIGHT] and character_dimensions[0] < window_width - character_dimensions[2] - speed:
-        character_dimensions[0] += speed
-        is_left = False
-        is_right = True
+    elif key_inputs[pg.K_RIGHT] and main_character.x < window_width - main_character.width - main_character.velocity:
+        main_character.x += main_character.velocity
+        main_character.set_right()
 
     else:
-        is_left = False
-        is_right = False
-        steps_taken = 0
+        main_character.set_neutral()
+        main_character.steps_taken = 0
 
-    if not in_jump:
+    if not main_character.in_jump:
         if key_inputs[pg.K_SPACE]:
-            in_jump = True
-            is_left = False
-            is_right = False
-            steps_taken = 0
+            main_character.in_jump = True
+            main_character.set_neutral()
+            main_character.steps_taken = 0
     else:
-        if jump_iter >= speed * -1:
-            character_dimensions[1] -= (jump_iter * abs(jump_iter)) / 2
-            jump_iter -= 1
+        if main_character.jump_iter >= -10:
+            # if main_character.jump_iter >= main_character.velocity * -1:
+            main_character.y -= (main_character.jump_iter * abs(main_character.jump_iter)) / 2
+            main_character.jump_iter -= 1
         else:
-            jump_iter = speed
-            in_jump = False
+            main_character.jump_iter = 10
+            main_character.in_jump = False
 
     draw_game_window()
 
