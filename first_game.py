@@ -25,6 +25,7 @@ class Player(object):
         self.is_left = False
         self.is_right = False
         self.steps_taken = 0
+        self.standing = True
 
     def set_left(self):
         self.is_left = True
@@ -42,14 +43,18 @@ class Player(object):
         if self.steps_taken + 1 >= 27:
             self.steps_taken = 0
 
-        if self.is_left:
-            window.blit(orient_left[self.steps_taken // 3], (self.x, self.y))
-            self.steps_taken += 1
-        elif self.is_right:
-            window.blit(orient_right[self.steps_taken // 3], (self.x, self.y))
-            self.steps_taken += 1
+        if not self.standing:
+            if self.is_left:
+                window.blit(orient_left[self.steps_taken // 3], (self.x, self.y))
+                self.steps_taken += 1
+            elif self.is_right:
+                window.blit(orient_right[self.steps_taken // 3], (self.x, self.y))
+                self.steps_taken += 1
         else:
-            window.blit(orient_neutral, (self.x, self.y))
+            if self.is_right:
+                window.blit(orient_right[0], (self.x, self.y))
+            else:
+                window.blit(orient_left[0], (self.x, self.y))
 
 
 class Projectile(object):
@@ -116,13 +121,15 @@ while window_alive:
     if key_inputs[pg.K_LEFT] and main_character.x > main_character.velocity:
         main_character.x -= main_character.velocity
         main_character.set_left()
+        main_character.standing = False
 
     elif key_inputs[pg.K_RIGHT] and main_character.x < window_width - main_character.width - main_character.velocity:
         main_character.x += main_character.velocity
         main_character.set_right()
+        main_character.standing = False
 
     else:
-        main_character.set_neutral()
+        main_character.standing = True
         main_character.steps_taken = 0
 
     if not main_character.in_jump:
