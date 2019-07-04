@@ -143,14 +143,14 @@ screen_fill = (0, 0, 0)
 
 def draw_game_window():
     game_window.blit(game_background, (0, 0))
-    main_character.draw(game_window)
+    ash.draw(game_window)
 
     for projectile in bullets_fired:
         projectile.draw(game_window)
     pg.display.update()
 
 
-main_character = Player(300, 410, 64, 64)
+ash = Player(300, 410, 64, 64)
 
 bullets_fired = []
 # the Main loop - as soon as the loop ends the game ends
@@ -174,37 +174,37 @@ while window_alive:
     key_inputs = pg.key.get_pressed()
 
     if key_inputs[pg.K_SPACE]:
-        direction = -1 if main_character.is_left else 1
+        direction = -1 if ash.is_left else 1
         if len(bullets_fired) < 5:
-            bullets_fired.append(Projectile(round(main_character.x + main_character.width // 2), round(main_character.y + main_character.height // 2), 6, (0, 0, 0), direction))
+            bullets_fired.append(Projectile(round(ash.x + ash.width // 2), round(ash.y + ash.height // 2), 6, (0, 0, 0), direction))
     # print(key_inputs)
-    if key_inputs[pg.K_LEFT] and main_character.x > main_character.velocity:
-        main_character.x -= main_character.velocity
-        main_character.set_left()
-        main_character.standing = False
+    if key_inputs[pg.K_LEFT] and ash.x > ash.velocity:
+        ash.x -= ash.velocity
+        ash.set_left()
+        ash.standing = False
 
-    elif key_inputs[pg.K_RIGHT] and main_character.x < window_width - main_character.width - main_character.velocity:
-        main_character.x += main_character.velocity
-        main_character.set_right()
-        main_character.standing = False
+    elif key_inputs[pg.K_RIGHT] and ash.x < window_width - ash.width - ash.velocity:
+        ash.x += ash.velocity
+        ash.set_right()
+        ash.standing = False
 
     else:
-        main_character.standing = True
-        main_character.steps_taken = 0
+        ash.standing = True
+        ash.steps_taken = 0
 
-    if not main_character.in_jump:
+    if not ash.in_jump:
         if key_inputs[pg.K_UP]:
-            main_character.in_jump = True
-            # main_character.set_neutral()
-            main_character.steps_taken = 0
+            ash.in_jump = True
+            # ash.set_neutral()
+            ash.steps_taken = 0
     else:
-        if main_character.jump_iter >= -10:
-            # if main_character.jump_iter >= main_character.velocity * -1:
-            main_character.y -= (main_character.jump_iter * abs(main_character.jump_iter)) / 2
-            main_character.jump_iter -= 1
+        if ash.jump_iter >= -10:
+            # if ash.jump_iter >= ash.velocity * -1:
+            ash.y -= (ash.jump_iter * abs(ash.jump_iter)) / 2
+            ash.jump_iter -= 1
         else:
-            main_character.jump_iter = 10
-            main_character.in_jump = False
+            ash.jump_iter = 10
+            ash.in_jump = False
 
     draw_game_window()
 
