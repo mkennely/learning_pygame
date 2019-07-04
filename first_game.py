@@ -58,7 +58,7 @@ class Player(object):
 
 
 class Projectile(object):
-    def __init__(self, x,y, radius, colour, direction):
+    def __init__(self, x, y, radius, colour, direction):
         self.x = x
         self.y = y
         self.radius = radius
@@ -67,7 +67,7 @@ class Projectile(object):
         self.velocity = 8 * direction
 
     def draw(self, window):
-        pg.draw.circle(window, self.color, (self.x, self.y), self.radius)
+        pg.draw.circle(window, self.colour, (self.x, self.y), self.radius)
 
 
 # load character model images
@@ -99,10 +99,15 @@ screen_fill = (0, 0, 0)
 def draw_game_window():
     game_window.blit(game_background, (0, 0))
     main_character.draw(game_window)
+
+    for projectile in bullets_fired:
+        projectile.draw(game_window)
     pg.display.update()
 
 
 main_character = Player(300, 410, 64, 64)
+
+bullets_fired = []
 # the Main loop - as soon as the loop ends the game ends
 while window_alive:
     # using delay in place of a clock
@@ -115,8 +120,18 @@ while window_alive:
         if event.type == pg.QUIT:
             window_alive = False
 
+    for bullet in bullets_fired:
+        if 1 < bullet.x < window_width - 1:  # screen boundaries
+            bullet.x += bullet.velocity
+        else:
+            bullets_fired.pop(bullets_fired.index(bullet))
+
     key_inputs = pg.key.get_pressed()
 
+    if key_inputs[pg.K_SPACE]:
+        direction = -1 if main_character.is_left else 1
+        if len(bullets_fired) < 5:
+            bullets_fired.append(Projectile(round(main_character.x + main_character.width // 2), round(main_character.y + main_character.height // 2), 6, (0, 0, 0), direction))
     # print(key_inputs)
     if key_inputs[pg.K_LEFT] and main_character.x > main_character.velocity:
         main_character.x -= main_character.velocity
@@ -133,9 +148,9 @@ while window_alive:
         main_character.steps_taken = 0
 
     if not main_character.in_jump:
-        if key_inputs[pg.K_SPACE]:
+        if key_inputs[pg.K_UP]:
             main_character.in_jump = True
-            main_character.set_neutral()
+            # main_character.set_neutral()
             main_character.steps_taken = 0
     else:
         if main_character.jump_iter >= -10:
