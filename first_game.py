@@ -52,6 +52,19 @@ class Player(object):
             window.blit(orient_neutral, (self.x, self.y))
 
 
+class Projectile(object):
+    def __init__(self, x,y, radius, colour, direction):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.colour = colour
+        self.direction = direction
+        self.velocity = 8 * direction
+
+    def draw(self, window):
+        pg.draw.circle(window, self.color, (self.x, self.y), self.radius)
+
+
 # load character model images
 # these images are shown when the character is moving left
 orient_right = [pg.image.load('assets/' + the_file) for the_file in listdir('assets') if ('R' in the_file and 'E' not in the_file)]
