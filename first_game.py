@@ -14,7 +14,7 @@ x = 50
 y = 50
 width = 20
 height = 20
-speed = 4
+speed = 8
 character_colour = (255, 105, 180)
 character_dimensions = [x, y, width, height]
 
