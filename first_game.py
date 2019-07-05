@@ -37,6 +37,10 @@ class Player(object):
         self.steps_taken = 0
         self.standing = True
         self.hitbox = (self.x + 20, self.y, 28, 60)
+        self.score = 0
+
+    def enemy_struck(self):
+        self.score += 1
 
     def set_left(self):
         self.is_left = True
@@ -67,7 +71,7 @@ class Player(object):
             else:
                 window.blit(self.orient_left[0], (self.x, self.y))
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        pg.draw.rect(game_window, (255, 0, 0), self.hitbox, 2)
+        # pg.draw.rect(game_window, (255, 0, 0), self.hitbox, 2)
 
 
 class Enemy(object):
@@ -84,20 +88,28 @@ class Enemy(object):
         self.step_count = 0
         self.velocity = 3
         self.hitbox = (self.x + 17, self.y + 2, 31, 57)
+        self.health = 10
+        self.is_visible = True
 
     def draw(self, window):
         self.move()
-        if self.step_count + 1 >= 33:
-            self.step_count = 0
+        if self.is_visible:
+            if self.step_count + 1 >= 33:
+                self.step_count = 0
 
-        if self.velocity > 0:
-            window.blit(self.orient_right[self.step_count // 3], (self.x, self.y))
-            self.step_count += 1
-        elif self.velocity < 0:
-            window.blit(self.orient_left[self.step_count // 3], (self.x, self.y))
-            self.step_count += 1
-        self.hitbox = (self.x + 17, self.y + 2, 31, 57)
-        pg.draw.rect(game_window, (255, 0, 0), self.hitbox, 2)
+            if self.velocity > 0:
+                window.blit(self.orient_right[self.step_count // 3], (self.x, self.y))
+                self.step_count += 1
+            elif self.velocity < 0:
+                window.blit(self.orient_left[self.step_count // 3], (self.x, self.y))
+                self.step_count += 1
+
+            self.hitbox = (self.x + 17, self.y + 2, 31, 57)
+            # pg.draw.rect(game_window, (255, 0, 0), self.hitbox, 2)
+
+            pg.draw.rect(game_window, (255, 0, 0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
+            pg.draw.rect(game_window, (0, 128, 0), (self.hitbox[0], self.hitbox[1] - 20, 5 * self.health, 10))
+
 
     def move(self):
         if self.velocity > 0:
@@ -114,6 +126,10 @@ class Enemy(object):
                 self.step_count = 0
 
     def is_hit(self):
+        if self.health > 0:
+            self.health -= 1
+        else:
+            self.is_visible = False
         print('Score!')
 
 
@@ -152,6 +168,8 @@ screen_fill = (0, 0, 0)
 
 def draw_game_window():
     game_window.blit(game_background, (0, 0))
+    score_text = score_font.render('Score: ' + str(ash.score), 1, (0, 0, 0))
+    game_window.blit(score_text, (370, 10))
     ash.draw(game_window)
     gary.draw(game_window)
 
@@ -164,6 +182,7 @@ ash = Player(300, 410, 64, 64)
 gary = Enemy(200, 410, 64, 64, 450)
 bullets_fired = []
 shot_loop = 0
+score_font = pg.font.SysFont('arial', 30, True)
 # the Main loop - as soon as the loop ends the game ends
 while window_alive:
     # using delay in place of a clock
@@ -186,6 +205,7 @@ while window_alive:
         if bullet.y - bullet.radius < gary.hitbox[1] + gary.hitbox[3] and bullet.y + bullet.radius > gary.hitbox[1]:
             if bullet.x - bullet.radius < gary.hitbox[0] + gary.hitbox[2] and bullet.x + bullet.radius > gary.hitbox[0]:
                 gary.is_hit()
+                ash.enemy_struck()
                 bullets_fired.pop(bullets_fired.index(bullet))
 
         if 1 < bullet.x < window_width - 1:  # screen boundaries
