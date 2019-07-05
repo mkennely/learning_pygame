@@ -36,6 +36,7 @@ class Player(object):
         self.is_right = False
         self.steps_taken = 0
         self.standing = True
+        self.hitbox = (self.x + 20, self.y, 28, 60)
 
     def set_left(self):
         self.is_left = True
@@ -65,6 +66,8 @@ class Player(object):
                 window.blit(self.orient_right[0], (self.x, self.y))
             else:
                 window.blit(self.orient_left[0], (self.x, self.y))
+        self.hitbox = (self.x + 17, self.y + 11, 29, 52)
+        pg.draw.rect(game_window, (255, 0, 0), self.hitbox, 2)
 
 
 class Enemy(object):
@@ -80,6 +83,7 @@ class Enemy(object):
         self.path = [self.x, self.end]
         self.step_count = 0
         self.velocity = 3
+        self.hitbox = (self.x + 17, self.y + 2, 31, 57)
 
     def draw(self, window):
         self.move()
@@ -92,6 +96,8 @@ class Enemy(object):
         elif self.velocity < 0:
             window.blit(self.orient_left[self.step_count // 3], (self.x, self.y))
             self.step_count += 1
+        self.hitbox = (self.x + 17, self.y + 2, 31, 57)
+        pg.draw.rect(game_window, (255, 0, 0), self.hitbox, 2)
 
     def move(self):
         if self.velocity > 0:
@@ -107,7 +113,11 @@ class Enemy(object):
                 self.velocity *= -1
                 self.step_count = 0
 
+    def is_hit(self):
+        print('Score!')
 
+
+# When you draw a circle the x,y is in the center of the circle, not the top left
 class Projectile(object):
     def __init__(self, x, y, radius, colour, direction):
         self.x = x
@@ -153,13 +163,17 @@ def draw_game_window():
 ash = Player(300, 410, 64, 64)
 gary = Enemy(200, 410, 64, 64, 450)
 bullets_fired = []
-
+shot_loop = 0
 # the Main loop - as soon as the loop ends the game ends
 while window_alive:
     # using delay in place of a clock
     # 1/10 of a second
     game_clock.tick(27)
 
+    if shot_loop > 0:
+        shot_loop += 1
+    if shot_loop > 3:
+        shot_loop = 0
     # character coordinates are stored in the top left of the character
 
     for event in pg.event.get():
@@ -167,6 +181,13 @@ while window_alive:
             window_alive = False
 
     for bullet in bullets_fired:
+        # left side is bottom of the bullet above the bottom of the hitbox
+        # right side is top of the bullet beneath the top of the hitbox
+        if bullet.y - bullet.radius < gary.hitbox[1] + gary.hitbox[3] and bullet.y + bullet.radius > gary.hitbox[1]:
+            if bullet.x - bullet.radius < gary.hitbox[0] + gary.hitbox[2] and bullet.x + bullet.radius > gary.hitbox[0]:
+                gary.is_hit()
+                bullets_fired.pop(bullets_fired.index(bullet))
+
         if 1 < bullet.x < window_width - 1:  # screen boundaries
             bullet.x += bullet.velocity
         else:
@@ -174,10 +195,13 @@ while window_alive:
 
     key_inputs = pg.key.get_pressed()
 
-    if key_inputs[pg.K_SPACE]:
+    if key_inputs[pg.K_SPACE] and shot_loop == 0:
         direction = -1 if ash.is_left else 1
         if len(bullets_fired) < 5:
             bullets_fired.append(Projectile(round(ash.x + ash.width // 2), round(ash.y + ash.height // 2), 6, (0, 0, 0), direction))
+
+        shot_loop = 1
+
     # print(key_inputs)
     if key_inputs[pg.K_LEFT] and ash.x > ash.velocity:
         ash.x -= ash.velocity
