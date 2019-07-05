@@ -83,7 +83,7 @@ class Enemy(object):
 
     def draw(self, window):
         self.move()
-        if self.step_count + 1 <= 33:
+        if self.step_count + 1 >= 33:
             self.step_count = 0
 
         if self.velocity > 0:
@@ -106,7 +106,6 @@ class Enemy(object):
             else:
                 self.velocity *= -1
                 self.step_count = 0
-        pass
 
 
 class Projectile(object):
@@ -144,6 +143,7 @@ screen_fill = (0, 0, 0)
 def draw_game_window():
     game_window.blit(game_background, (0, 0))
     ash.draw(game_window)
+    gary.draw(game_window)
 
     for projectile in bullets_fired:
         projectile.draw(game_window)
@@ -151,8 +151,9 @@ def draw_game_window():
 
 
 ash = Player(300, 410, 64, 64)
-
+gary = Enemy(200, 410, 64, 64, 450)
 bullets_fired = []
+
 # the Main loop - as soon as the loop ends the game ends
 while window_alive:
     # using delay in place of a clock
