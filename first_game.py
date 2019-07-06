@@ -12,6 +12,12 @@ pg.init()
 
 game_clock = pg.time.Clock()
 
+bullet_sound = pg.mixer.Sound('assets/bullet.wav')
+hit_sound = pg.mixer.Sound('assets/hit.wav')
+
+loop_music = pg.mixer.music.load('assets/music.mp3')
+pg.mixer.music.play(-1)
+
 
 class Player(object):
     # load character model images
@@ -60,18 +66,37 @@ class Player(object):
 
         if not self.standing:
             if self.is_left:
-                window.blit(self.orient_left[self.steps_taken // 3], (self.x, self.y))
+                window.blit(self.orient_left[self.steps_taken // 3], (self.x, self.y))  # Cycles through the 9 walking animations
                 self.steps_taken += 1
             elif self.is_right:
                 window.blit(self.orient_right[self.steps_taken // 3], (self.x, self.y))
                 self.steps_taken += 1
-        else:
+        else:  # blit the character standing still
             if self.is_right:
                 window.blit(self.orient_right[0], (self.x, self.y))
             else:
                 window.blit(self.orient_left[0], (self.x, self.y))
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
         # pg.draw.rect(game_window, (255, 0, 0), self.hitbox, 2)
+
+    def collide(self):
+        # once character collides with the goblin they are reset
+        self.x = 60
+        self.y = 410
+        self.steps_taken = 0  # starts the image cycle over so the character isn't blitted mid-stride
+        self.score -= 5
+        collision_font = pg.font.SysFont('arial', 100)
+        collision_text = collision_font.render('-5', 1, (255, 0, 0))
+        game_window.blit(collision_text, (window_width // 2 - collision_text.get_width() // 2, window_height // 2))
+        pg.display.update()
+        crude_clock = 0
+        while crude_clock < 100:
+            pg.time.delay(10)
+            crude_clock += 1
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    crude_clock = 301
+                    pg.quit()
 
 
 class Enemy(object):
@@ -110,7 +135,6 @@ class Enemy(object):
             pg.draw.rect(game_window, (255, 0, 0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
             pg.draw.rect(game_window, (0, 128, 0), (self.hitbox[0], self.hitbox[1] - 20, 5 * self.health, 10))
 
-
     def move(self):
         if self.velocity > 0:
             if self.x + self.velocity < self.path[1]:
@@ -126,6 +150,7 @@ class Enemy(object):
                 self.step_count = 0
 
     def is_hit(self):
+        hit_sound.play()
         if self.health > 0:
             self.health -= 1
         else:
@@ -189,6 +214,10 @@ while window_alive:
     # 1/10 of a second
     game_clock.tick(27)
 
+    if ash.hitbox[1] < gary.hitbox[1] + gary.hitbox[3] and ash.hitbox[1] + ash.hitbox[3] > gary.hitbox[1]:
+        if ash.hitbox[0] < gary.hitbox[0] + gary.hitbox[2] and ash.hitbox[0] + ash.hitbox[2] > gary.hitbox[0]:
+            ash.collide()
+
     if shot_loop > 0:
         shot_loop += 1
     if shot_loop > 3:
@@ -216,6 +245,7 @@ while window_alive:
     key_inputs = pg.key.get_pressed()
 
     if key_inputs[pg.K_SPACE] and shot_loop == 0:
+        bullet_sound.play()
         direction = -1 if ash.is_left else 1
         if len(bullets_fired) < 5:
             bullets_fired.append(Projectile(round(ash.x + ash.width // 2), round(ash.y + ash.height // 2), 6, (0, 0, 0), direction))
