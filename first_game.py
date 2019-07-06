@@ -85,6 +85,8 @@ class Player(object):
         self.y = 410
         self.steps_taken = 0  # starts the image cycle over so the character isn't blitted mid-stride
         self.score -= 5
+        self.in_jump = False
+        self.jump_iter = 10
         collision_font = pg.font.SysFont('arial', 100)
         collision_text = collision_font.render('-5', 1, (255, 0, 0))
         game_window.blit(collision_text, (window_width // 2 - collision_text.get_width() // 2, window_height // 2))
@@ -194,7 +196,7 @@ screen_fill = (0, 0, 0)
 def draw_game_window():
     game_window.blit(game_background, (0, 0))
     score_text = score_font.render('Score: ' + str(ash.score), 1, (0, 0, 0))
-    game_window.blit(score_text, (370, 10))
+    game_window.blit(score_text, (330, 10))
     ash.draw(game_window)
     gary.draw(game_window)
 
@@ -214,9 +216,10 @@ while window_alive:
     # 1/10 of a second
     game_clock.tick(27)
 
-    if ash.hitbox[1] < gary.hitbox[1] + gary.hitbox[3] and ash.hitbox[1] + ash.hitbox[3] > gary.hitbox[1]:
-        if ash.hitbox[0] < gary.hitbox[0] + gary.hitbox[2] and ash.hitbox[0] + ash.hitbox[2] > gary.hitbox[0]:
-            ash.collide()
+    if gary.is_visible:
+        if ash.hitbox[1] < gary.hitbox[1] + gary.hitbox[3] and ash.hitbox[1] + ash.hitbox[3] > gary.hitbox[1]:
+            if ash.hitbox[0] < gary.hitbox[0] + gary.hitbox[2] and ash.hitbox[0] + ash.hitbox[2] > gary.hitbox[0]:
+                ash.collide()
 
     if shot_loop > 0:
         shot_loop += 1
