@@ -28,6 +28,7 @@ class BaseGameObject:
         self.y = y
         self.width = width
         self.height = height
+        # self.hitbox = (x, y, width, height)
 
 
 class Player(BaseGameObject):
@@ -81,6 +82,21 @@ class Player(BaseGameObject):
                 self.runCount = 0
             win.blit(self.run[self.runCount // 6], (self.x, self.y))
             self.runCount += 1
+
+
+class Saw(BaseGameObject):
+    img = [pg.image.load(os.path.join('images', f'SAW{x}.png')) for x in range(0, 4)]
+
+    def __init__(self, x, y, width, height):
+        BaseGameObject.__init__(self, x, y, width, height)
+        self.hitbox = (x, y, width, height)
+        self.rotate_count = 0
+
+    def draw(self, window):
+        if self.rotate_count >= 8:
+            self.rotate_count = 0
+        window.blit(self.img[self.rotate_count // 2], (self.x, self.y))
+        pg.draw.rect(window, (255, 0, 0), self.hitbox, 2)
 
 
 def draw_window():
