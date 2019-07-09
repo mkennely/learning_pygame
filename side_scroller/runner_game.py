@@ -22,7 +22,15 @@ background_width = background.get_width()
 game_clock = pg.time.Clock()
 
 
-class Player(object):
+class BaseGameObject:
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+
+class Player(BaseGameObject):
     run = [pg.image.load(os.path.join('assets', str(x) + '.png')) for x in range(8, 16)]
     jump = [pg.image.load(os.path.join('assets', str(x) + '.png')) for x in range(1, 8)]
     slide = [pg.image.load(os.path.join('assets', 'S1.png')), pg.image.load(os.path.join('assets', 'S2.png')),
@@ -37,10 +45,7 @@ class Player(object):
                 -3, -3, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4]
 
     def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+        BaseGameObject.__init__(self, x, y, width, height)
         self.jumping = False
         self.sliding = False
         self.slideCount = 0
