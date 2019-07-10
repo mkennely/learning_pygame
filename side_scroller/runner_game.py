@@ -42,6 +42,7 @@ class Player(BaseGameObject):
              pg.image.load(os.path.join('assets', 'S2.png')), pg.image.load(os.path.join('assets', 'S2.png')),
              pg.image.load(os.path.join('assets', 'S3.png')), pg.image.load(os.path.join('assets', 'S4.png')),
              pg.image.load(os.path.join('assets', 'S5.png'))]
+    fall = pg.image.load(os.path.join('assets', '0.png'))
     jumpList = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4,
                 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1,
                 -1, -1, -1, -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3,
@@ -55,6 +56,8 @@ class Player(BaseGameObject):
         self.jumpCount = 0
         self.runCount = 0
         self.slideUp = False
+        self.falling = False
+        self.hitbox = (x, y, width, height)
 
     def draw(self, win):
         if self.jumping:
@@ -65,6 +68,7 @@ class Player(BaseGameObject):
                 self.jumpCount = 0
                 self.jumping = False
                 self.runCount = 0
+            self.hitbox = (self.x + 4, self.y, self.width - 24, self.height - 10)
         elif self.sliding or self.slideUp:
             if self.slideCount < 20:
                 self.y += 1
@@ -72,18 +76,25 @@ class Player(BaseGameObject):
                 self.y -= 19
                 self.sliding = False
                 self.slideUp = True
+            elif 20 < self.slideCount < 80:
+                self.hitbox = (self.x, self.y + 3, self.width - 8, self.height - 35)
             if self.slideCount >= 110:
                 self.slideCount = 0
                 self.slideUp = False
                 self.runCount = 0
+                self.hitbox = (self.x + 4, self.y, self.width - 24, self.height - 10)
             win.blit(self.slide[self.slideCount // 10], (self.x, self.y))
             self.slideCount += 1
 
+        elif self.falling:
+            win.blit(self.fall, (self.x, self.y + 30))
         else:
             if self.runCount > 42:
                 self.runCount = 0
             win.blit(self.run[self.runCount // 6], (self.x, self.y))
             self.runCount += 1
+            self.hitbox = (self.x + 4, self.y, self.width - 24, self.height - 13)
+        pg.draw.rect(win, (255, 0, 0), self.hitbox, 1)
 
 
 class Saw(BaseGameObject):
