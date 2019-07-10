@@ -1,5 +1,7 @@
 import pygame as pg
+
 from pygame.locals import *
+from random import randrange
 
 import os
 import sys
@@ -85,7 +87,7 @@ class Player(BaseGameObject):
 
 
 class Saw(BaseGameObject):
-    img = [pg.image.load(os.path.join('images', f'SAW{x}.png')) for x in range(0, 4)]
+    img = [pg.image.load(os.path.join('assets', f'SAW{x}.png')) for x in range(0, 4)]
 
     def __init__(self, x, y, width, height):
         BaseGameObject.__init__(self, x, y, width, height)
@@ -93,9 +95,21 @@ class Saw(BaseGameObject):
         self.rotate_count = 0
 
     def draw(self, window):
+        self.hitbox = (self.x + 5, self.y + 5, self.width - 10, self.height)
         if self.rotate_count >= 8:
             self.rotate_count = 0
-        window.blit(self.img[self.rotate_count // 2], (self.x, self.y))
+        window.blit(pg.transform.scale(self.img[self.rotate_count // 2], (64, 64)), (self.x, self.y))
+        self.rotate_count += 1
+        pg.draw.rect(window, (255, 0, 0), self.hitbox, 2)
+
+
+class Spike(Saw):
+
+    img = pg.image.load(os.path.join('assets', 'spike.png'))
+
+    def draw(self, window):
+        self.hitbox = (self.x + 10, self.y, 28, 315)
+        window.blit(self.img, (self.x, self.y))
         pg.draw.rect(window, (255, 0, 0), self.hitbox, 2)
 
 
@@ -103,18 +117,32 @@ def draw_window():
     game_window.blit(background, (bgX, 0))
     game_window.blit(background, (bgX2, 0))
     dino.draw(game_window)
+
+    for obstacle in obstacles:
+        obstacle.draw(game_window)
     pg.display.update()
 
 
+# every half a second this event is triggered and when it's triggered it ups the clock speed
 pg.time.set_timer(USEREVENT+1, 500)
+
+pg.time.set_timer(USEREVENT+2, randrange(2000, 3500))
 run_game = True
 clock_speed = 30
 dino = Player(200, 313, 64, 64)
+x_delta = 1.4
+
+obstacles = []
 while run_game:
     draw_window()
 
-    bgX -= 1.4
-    bgX2 -= 1.4
+    for obstacle in obstacles:
+        obstacle.x -= x_delta
+        if obstacle.x < obstacle.width * -1:
+            obstacles.pop(obstacles.index(obstacle))
+
+    bgX -= x_delta
+    bgX2 -= x_delta
 
     if bgX < background_width * -1:
         bgX = background_width
@@ -129,6 +157,16 @@ while run_game:
             quit()
         if event.type == USEREVENT+1:
             clock_speed += 1
+        if event.type == USEREVENT+2:
+
+            random_decider = randrange(0, 2)
+            random_saw = Saw(810, 310, 64, 64)
+            random_spike = Spike(810, 0, 48, 320)
+
+            if random_decider == 0:
+                obstacles.append(random_saw)
+            else:
+                obstacles.append(random_spike)
 
     key_strokes = pg.key.get_pressed()
 
